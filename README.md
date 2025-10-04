@@ -36,7 +36,7 @@ Sistema de pedidos online desenvolvido para restaurantes, substituindo o uso de 
 
 ### 📜 Histórico de Pedidos
 - Consultar pedidos já concluídos.  
-- Visualização de mesa, itens e horário correto em **horário local (America/Sao_Paulo)**.  
+- Visualização de mesa, itens e horário.  
 - Paginação de pedidos (3 por página).
 
 ---
