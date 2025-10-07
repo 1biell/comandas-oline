@@ -1,0 +1,203 @@
+/* === 🌟 Tema Global Moderno — Sistema de Pedidos === */
+
+/* Fonte global */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* === Reset === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* === Variáveis === */
+:root {
+  --navy: #0A2E43;
+  --accent: #F5D580;
+  --text: #123859;
+  --muted: #6b7280;
+  --bg: #F4F6F8;
+  --card: #FFFFFF;
+  --danger: #ff4d4d;
+  --success: #32cd32;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --radius: 8px;
+  --transition: 0.2s ease;
+}
+
+/* === Base === */
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === Container central === */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === Header (menu principal) === */
+header {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+
+header button {
+  background: var(--navy);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+header button:hover {
+  background: var(--accent);
+  color: var(--navy);
+  transform: translateY(-2px);
+}
+
+/* === Títulos === */
+h1, h2, h3 {
+  color: var(--navy);
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* === Cards genéricos === */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  width: 100%;
+  max-width: 600px;
+  margin: 12px auto;
+  text-align: left;
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+/* === Botões === */
+button {
+  font-family: 'Inter', sans-serif;
+  border: none;
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+button.primary {
+  background: var(--navy);
+  color: #fff;
+}
+
+button.primary:hover {
+  background: var(--accent);
+  color: var(--navy);
+}
+
+button.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+button.danger:hover {
+  opacity: 0.9;
+}
+
+/* === Inputs === */
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  color: var(--text);
+  background: #fff;
+  transition: border-color 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--navy);
+}
+
+/* === Responsividade === */
+@media (max-width: 768px) {
+  header {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  header button {
+    flex: 1 1 45%;
+    text-align: center;
+  }
+
+  .container {
+    padding: 20px 10px;
+  }
+
+  .card {
+    width: 95%;
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  header button {
+    flex: 1 1 100%;
+  }
+
+  .container {
+    padding: 15px 8px;
+  }
+
+  h1 {
+    font-size: 1.3rem;
+  }
+}

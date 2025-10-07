@@ -1,0 +1,37 @@
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--page-bg);
+}
+
+.register-box {
+  background: var(--card-bg);
+  padding: 30px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.register-box h2 {
+  color: var(--vitro-navy);
+  margin-bottom: 15px;
+}
+
+.register-box input {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.register-box button {
+  width: 100%;
+  margin-top: 10px;
+}
+.register-box .link {
+  margin-top: 15px;
+  color: var(--vitro-navy);
+  cursor: pointer;
+}

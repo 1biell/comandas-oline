@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "../styles/Garcom.css";
+
 
 function Garcom() {
   const [pedidos, setPedidos] = useState([]);
@@ -8,13 +10,20 @@ function Garcom() {
   const [quantidade, setQuantidade] = useState(1);
   const [observacao, setObservacao] = useState("");
   const [itens, setItens] = useState([]);
+  const [mensagem, setMensagem] = useState("");
   const [paginaAtual, setPaginaAtual] = useState(1);
   const pedidosPorPagina = 5;
 
+  const token = localStorage.getItem("token");
+
   const fetchPedidos = () => {
-    axios.get("http://localhost:5000/pedidos")
-      .then(res => setPedidos(res.data))
-      .catch(err => console.error(err));
+    if (!token) return;
+    axios
+      .get("http://localhost:5000/api/pedidos", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setPedidos(res.data))
+      .catch((err) => console.error("Erro ao carregar pedidos:", err));
   };
 
   useEffect(() => {
@@ -34,17 +43,31 @@ function Garcom() {
     setItens(itens.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!mesa || itens.length === 0) return;
 
     const novoPedido = { mesa: parseInt(mesa), itens, observacao };
-    axios.post("http://localhost:5000/pedidos", novoPedido)
-      .then(() => {
-        fetchPedidos();
-        setMesa(""); setObservacao(""); setItens([]);
-      })
-      .catch(err => console.error(err));
+
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/pedidos",
+        novoPedido,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setMensagem(res.data.message || "✅ Pedido enviado com sucesso!");
+      fetchPedidos();
+      setMesa("");
+      setObservacao("");
+      setItens([]);
+      setTimeout(() => setMensagem(""), 3000);
+    } catch (err) {
+      console.error("Erro ao enviar pedido:", err);
+      setMensagem("❌ Erro ao enviar pedido.");
+      setTimeout(() => setMensagem(""), 3000);
+    }
   };
 
   // Ordenar pedidos mais recentes primeiro
@@ -55,7 +78,10 @@ function Garcom() {
   // Paginação
   const indexUltimoPedido = paginaAtual * pedidosPorPagina;
   const indexPrimeiroPedido = indexUltimoPedido - pedidosPorPagina;
-  const pedidosPaginaAtual = pedidosOrdenados.slice(indexPrimeiroPedido, indexUltimoPedido);
+  const pedidosPaginaAtual = pedidosOrdenados.slice(
+    indexPrimeiroPedido,
+    indexUltimoPedido
+  );
   const totalPaginas = Math.ceil(pedidos.length / pedidosPorPagina);
 
   const irParaPagina = (numero) => {
@@ -64,10 +90,8 @@ function Garcom() {
     setPaginaAtual(numero);
   };
 
-  // Função para ajustar horário UTC para São Paulo
   const formatarData = (data) => {
     const d = new Date(data);
-    d.setHours(d.getHours() - 0);  // Ajustar aqui conforme necessario
     return d.toLocaleString("pt-BR", {
       day: "2-digit",
       month: "2-digit",
@@ -80,23 +104,73 @@ function Garcom() {
   return (
     <div>
       <h1>🍣 Menu do Garçom</h1>
+
       <form onSubmit={handleSubmit}>
-        <input type="number" placeholder="Mesa" value={mesa} onChange={e => setMesa(e.target.value)} required />
-        <input type="text" placeholder="Produto" value={produto} onChange={e => setProduto(e.target.value)} />
-        <input type="number" placeholder="Qtd" value={quantidade} onChange={e => setQuantidade(e.target.value)} />
-        <button type="button" onClick={adicionarItem}>Adicionar Item</button>
+        <input
+          type="number"
+          placeholder="Mesa"
+          value={mesa}
+          onChange={(e) => setMesa(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Produto"
+          value={produto}
+          onChange={(e) => setProduto(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Qtd"
+          value={quantidade}
+          onChange={(e) => setQuantidade(e.target.value)}
+        />
+        <button type="button" onClick={adicionarItem}>
+          Adicionar Item
+        </button>
         <button type="submit">Enviar Pedido</button>
       </form>
 
+      {mensagem && (
+        <p
+          style={{
+            marginTop: "10px",
+            fontWeight: "bold",
+            color: mensagem.startsWith("✅") ? "green" : "red",
+          }}
+        >
+          {mensagem}
+        </p>
+      )}
+
       {itens.length > 0 && (
-        <div style={{ maxWidth: "500px", margin: "0 auto 20px", background: "#fff", padding: "15px", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.08)" }}>
+        <div
+          style={{
+            maxWidth: "500px",
+            margin: "0 auto 20px",
+            background: "#fff",
+            padding: "15px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          }}
+        >
           <h3>Itens do Pedido</h3>
           <ul>
             {itens.map((i, idx) => (
               <li key={idx}>
-                {i.quantidade}x {i.produto} 
-                <button style={{ marginLeft: "10px", background: "#ff4d4d", color: "#fff", borderRadius: "6px", padding: "2px 6px" }}
-                  onClick={() => removerItem(idx)}>X</button>
+                {i.quantidade}x {i.produto}
+                <button
+                  style={{
+                    marginLeft: "10px",
+                    background: "#ff4d4d",
+                    color: "#fff",
+                    borderRadius: "6px",
+                    padding: "2px 6px",
+                  }}
+                  onClick={() => removerItem(idx)}
+                >
+                  X
+                </button>
               </li>
             ))}
           </ul>
@@ -105,11 +179,19 @@ function Garcom() {
 
       <h2>📋 Pedidos Registrados</h2>
       <ul>
-        {pedidosPaginaAtual.map(p => (
-          <li key={p.id} style={{ opacity: p.status === "concluído" ? 0.6 : 1 }}>
-            <strong>Mesa {p.mesa}</strong> - {p.status} - {formatarData(p.data_pedido)}
+        {pedidosPaginaAtual.map((p) => (
+          <li
+            key={p.id}
+            style={{ opacity: p.status === "concluído" ? 0.6 : 1 }}
+          >
+            <strong>Mesa {p.mesa}</strong> - {p.status} -{" "}
+            {formatarData(p.data_pedido)}
             <ul>
-              {p.itens.map((i, idx) => (<li key={idx}>{i.quantidade}x {i.produto}</li>))}
+              {p.itens.map((i, idx) => (
+                <li key={idx}>
+                  {i.quantidade}x {i.produto}
+                </li>
+              ))}
             </ul>
             {p.observacao && <em>Obs: {p.observacao}</em>}
           </li>
@@ -118,9 +200,21 @@ function Garcom() {
 
       {totalPaginas > 1 && (
         <div className="paginacao">
-          <button onClick={() => irParaPagina(paginaAtual - 1)} disabled={paginaAtual === 1}>&lt; Anterior</button>
-          <span>Página {paginaAtual} de {totalPaginas}</span>
-          <button onClick={() => irParaPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas}>Próxima &gt;</button>
+          <button
+            onClick={() => irParaPagina(paginaAtual - 1)}
+            disabled={paginaAtual === 1}
+          >
+            &lt; Anterior
+          </button>
+          <span>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+          <button
+            onClick={() => irParaPagina(paginaAtual + 1)}
+            disabled={paginaAtual === totalPaginas}
+          >
+            Próxima &gt;
+          </button>
         </div>
       )}
     </div>

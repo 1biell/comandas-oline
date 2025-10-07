@@ -1,0 +1,122 @@
+/* === Painel da Cozinha — Estilo Minimalista === */
+
+.cozinha-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 30px auto;
+  font-family: "Roboto", sans-serif;
+  color: var(--primary-text);
+}
+
+.cozinha-container h1 {
+  text-align: center;
+  color: var(--vitro-navy);
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+/* Lista de pedidos */
+.cozinha-pedidos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Card simples */
+.cozinha-pedido {
+  background: var(--card-bg);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+}
+
+/* Textos */
+.cozinha-pedido h3 {
+  font-size: 1rem;
+  color: var(--vitro-navy);
+  margin-bottom: 4px;
+}
+
+.cozinha-pedido p {
+  margin: 2px 0;
+  font-size: 0.9rem;
+}
+
+/* Lista de itens */
+.cozinha-pedido ul {
+  list-style: none;
+  padding-left: 12px;
+  margin: 4px 0;
+}
+
+.cozinha-pedido ul li {
+  font-size: 0.9rem;
+}
+
+/* Botões de status */
+.btn-status {
+  margin-top: 6px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-status.em-preparo {
+  background: #ffa500;
+  color: #fff;
+}
+
+.btn-status.concluir {
+  background: #32cd32;
+  color: #fff;
+}
+
+/* Status visuais */
+.status-pendente {
+  color: #d4aa00;
+}
+
+.status-em-preparo {
+  color: #ff8c00;
+}
+
+.status-concluido {
+  color: #228b22;
+}
+
+/* Paginação */
+.paginacao {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.paginacao button {
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 4px;
+  background: var(--vitro-navy);
+  color: #fff;
+  cursor: pointer;
+}
+
+.paginacao button:hover:not(:disabled) {
+  background: var(--vitro-accent);
+  color: var(--vitro-navy);
+}
+
+.paginacao button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.paginacao span {
+  font-size: 0.85rem;
+}

@@ -1,4 +1,4 @@
-const pool = require("../models/pedidosModel");
+const pool = require("../db");
 
 // Criar um novo pedido
 exports.criarPedido = async (req, res) => {

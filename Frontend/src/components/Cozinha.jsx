@@ -1,15 +1,23 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import "../styles/Cozinha.css";
 
 function Cozinha() {
   const [pedidos, setPedidos] = useState([]);
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const pedidosPorPagina = 5;
+  const pedidosPorPagina = 5; // 🔹 Limite de pedidos por página
 
-  const fetchPedidos = () => {
-    axios.get("http://localhost:5000/pedidos")
-      .then(res => setPedidos(res.data))
-      .catch(err => console.error(err));
+  const token = localStorage.getItem("token");
+
+  const fetchPedidos = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/pedidos", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPedidos(res.data);
+    } catch (err) {
+      console.error("Erro ao carregar pedidos:", err);
+    }
   };
 
   useEffect(() => {
@@ -18,101 +26,121 @@ function Cozinha() {
     return () => clearInterval(interval);
   }, []);
 
-  const atualizarStatus = (id, status) => {
-    axios.patch(`http://localhost:5000/pedidos/${id}`, { status })
-      .then(() => fetchPedidos())
-      .catch(err => console.error(err));
-  };
-
-  const statusColor = (status) => {
-    switch(status) {
-      case "pendente": return "#1E90FF";
-      case "em preparo": return "#FFA500";
-      case "concluído": return "#32CD32";
-      default: return "#ffffff";
+  const atualizarStatus = async (id, status) => {
+    try {
+      await axios.patch(
+        `http://localhost:5000/api/pedidos/${id}`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      fetchPedidos();
+    } catch (err) {
+      console.error("Erro ao atualizar status:", err);
     }
   };
 
-  // Ordenar pedidos mais recentes primeiro
-  const pedidosOrdenados = [...pedidos].sort(
-    (a, b) => new Date(b.data_pedido) - new Date(a.data_pedido)
-  );
-
-  const indexUltimoPedido = paginaAtual * pedidosPorPagina;
-  const indexPrimeiroPedido = indexUltimoPedido - pedidosPorPagina;
-  const pedidosPaginaAtual = pedidosOrdenados.slice(indexPrimeiroPedido, indexUltimoPedido);
-  const totalPaginas = Math.ceil(pedidos.length / pedidosPorPagina);
-
-  const irParaPagina = (numero) => {
-    if (numero < 1) numero = 1;
-    if (numero > totalPaginas) numero = totalPaginas;
-    setPaginaAtual(numero);
+  const getClassByStatus = (status) => {
+    switch (status) {
+      case "pendente":
+        return "status-pendente";
+      case "em preparo":
+        return "status-em-preparo";
+      case "concluído":
+        return "status-concluido";
+      default:
+        return "";
+    }
   };
 
-  // Função para ajustar horário UTC para São Paulo
-  const formatarData = (data) => {
-    const d = new Date(data);
-    d.setHours(d.getHours() - 0);  // Ajustar aqui conforme necessario
-    return d.toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const getButtonByStatus = (pedido) => {
+    if (pedido.status === "pendente") {
+      return (
+        <button
+          className="btn-status em-preparo"
+          onClick={() => atualizarStatus(pedido.id, "em preparo")}
+        >
+          Iniciar preparo 🍳
+        </button>
+      );
+    }
+    if (pedido.status === "em preparo") {
+      return (
+        <button
+          className="btn-status concluir"
+          onClick={() => atualizarStatus(pedido.id, "concluído")}
+        >
+          Concluir ✅
+        </button>
+      );
+    }
+    return null;
+  };
+
+  // 🔹 Paginação lógica
+  const indexUltimo = paginaAtual * pedidosPorPagina;
+  const indexPrimeiro = indexUltimo - pedidosPorPagina;
+  const pedidosPaginaAtual = pedidos.slice(indexPrimeiro, indexUltimo);
+  const totalPaginas = Math.ceil(pedidos.length / pedidosPorPagina);
+
+  const irParaPagina = (num) => {
+    if (num < 1 || num > totalPaginas) return;
+    setPaginaAtual(num);
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>🍣 Tela da Cozinha</h1>
-      {pedidos.length === 0 && <p>Nenhum pedido no momento.</p>}
+    <div className="cozinha-container">
+      <h1>👨‍🍳 Painel da Cozinha</h1>
 
-      <ul style={{ padding: 0 }}>
-        {pedidosPaginaAtual.map(p => (
-          <li key={p.id} style={{
-            background: statusColor(p.status),
-            margin: "10px auto",
-            padding: "20px",
-            borderRadius: "15px",
-            maxWidth: "500px",
-            listStyle: "none",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            color: "#ffffff",
-            opacity: p.status === "concluído" ? 0.9 : 1
-          }}>
-            <strong>Mesa {p.mesa}</strong> - {p.status} - {formatarData(p.data_pedido)}
-            <ul>
-              {p.itens.map((i, idx) => (<li key={idx}>{i.quantidade}x {i.produto}</li>))}
-            </ul>
-            {p.observacao && <em>Obs: {p.observacao}</em>}
+      {pedidosPaginaAtual.length === 0 ? (
+        <p>Nenhum pedido no momento 🍣</p>
+      ) : (
+        <div className="cozinha-pedidos">
+          {pedidosPaginaAtual.map((pedido) => (
+            <div
+              key={pedido.id}
+              className={`cozinha-pedido ${getClassByStatus(pedido.status)}`}
+            >
+              <h3>Mesa {pedido.mesa}</h3>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className={getClassByStatus(pedido.status)}>
+                  {pedido.status}
+                </span>
+              </p>
+              <ul>
+                {pedido.itens.map((item, idx) => (
+                  <li key={idx}>
+                    {item.quantidade}x {item.produto}
+                  </li>
+                ))}
+              </ul>
+              {pedido.observacao && (
+                <p className="observacao">📝 {pedido.observacao}</p>
+              )}
+              {getButtonByStatus(pedido)}
+            </div>
+          ))}
+        </div>
+      )}
 
-            {p.status !== "concluído" && (
-              <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
-                {p.status === "pendente" && (
-                  <button 
-                    style={{ padding: "8px 12px", background: "#1E90FF", color: "#F0F2F2", borderRadius: "6px", fontWeight: "600" }}
-                    onClick={() => atualizarStatus(p.id, "em preparo")}
-                  >
-                    Em preparo
-                  </button>
-                )}
-                <button 
-                  style={{ padding: "8px 12px", background: "#123859", color: "#F0F2F2", borderRadius: "6px", fontWeight: "600" }}
-                  onClick={() => atualizarStatus(p.id, "concluído")}
-                >
-                  Concluir
-                </button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-
+      {/* 🔸 Paginação */}
       {totalPaginas > 1 && (
         <div className="paginacao">
-          <button onClick={() => irParaPagina(paginaAtual - 1)} disabled={paginaAtual === 1}>&lt; Anterior</button>
-          <span>Página {paginaAtual} de {totalPaginas}</span>
-          <button onClick={() => irParaPagina(paginaAtual + 1)} disabled={paginaAtual === totalPaginas}>Próxima &gt;</button>
+          <button
+            onClick={() => irParaPagina(paginaAtual - 1)}
+            disabled={paginaAtual === 1}
+          >
+            ⬅️ Anterior
+          </button>
+          <span>
+            Página {paginaAtual} de {totalPaginas}
+          </span>
+          <button
+            onClick={() => irParaPagina(paginaAtual + 1)}
+            disabled={paginaAtual === totalPaginas}
+          >
+            Próxima ➡️
+          </button>
         </div>
       )}
     </div>
